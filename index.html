@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="el" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <!-- interactive-widget: το πληκτρολόγιο "μικραίνει" τη σελίδα αντί να την καλύπτει (Chrome Android) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+  <title>Όνομα, Ζώο, Φυτό, Πράγμα</title>
+  <meta name="description" content="Το κλασικό παιχνίδι με φίλους, online και σε πραγματικό χρόνο." />
+  <meta name="theme-color" content="#6d28d9" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <!-- Πάνω μπάρα: θέμα & ήχος -->
+  <header class="topbar">
+    <button class="brand" id="brandBtn" aria-label="Αρχική">Ο·Ζ·Φ·Π</button>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="muteBtn" aria-label="Ήχος">🔊</button>
+      <button class="icon-btn" id="themeBtn" aria-label="Θέμα">🌙</button>
+    </div>
+  </header>
+
+  <main id="app">
+    <!-- ================= ΑΡΧΙΚΗ ================= -->
+    <section class="screen" id="screen-home">
+      <div class="hero">
+        <h1 class="title">
+          <span style="--c:#ff5d73">Όνομα</span>
+          <span style="--c:#ffb020">Ζώο</span>
+          <span style="--c:#22c55e">Φυτό</span>
+          <span style="--c:#3b82f6">Πράγμα</span>
+        </h1>
+        <p class="subtitle" id="inviteText">Παίξε με 2–5 φίλους, online, σε πραγματικό χρόνο.</p>
+      </div>
+
+      <div class="card">
+        <label class="label" for="nickInput">Ψευδώνυμο</label>
+        <input id="nickInput" class="input" maxlength="16" placeholder="π.χ. Άγγελος" autocomplete="off" autocapitalize="words" spellcheck="false" lang="el" />
+        <div class="label">Avatar</div>
+        <div class="picker" id="avatarPicker"></div>
+        <div class="label">Χρώμα</div>
+        <div class="picker" id="colorPicker"></div>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="create" role="tab">Νέο δωμάτιο</button>
+        <button class="tab" data-tab="join" role="tab">Έχω κωδικό</button>
+      </div>
+
+      <div class="card tab-panel" id="panel-create">
+        <div class="label">Μέγιστοι παίκτες</div>
+        <div class="segmented" id="segPlayers"></div>
+        <div class="label">Γύροι</div>
+        <div class="segmented" id="segRounds"></div>
+        <div class="label">Χρόνος ανά γύρο</div>
+        <div class="segmented" id="segTime"></div>
+        <div class="label">Κατηγορίες</div>
+        <div class="chips" id="catChips"></div>
+        <button class="btn btn-primary btn-big" id="createBtn">Δημιουργία δωματίου</button>
+      </div>
+
+      <div class="card tab-panel hidden" id="panel-join">
+        <label class="label" for="codeInput">Κωδικός δωματίου</label>
+        <input id="codeInput" class="input code-input" maxlength="4" placeholder="AB12" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+        <button class="btn btn-primary btn-big" id="joinBtn">Μπες στο παιχνίδι</button>
+      </div>
+    </section>
+
+    <!-- ================= LOBBY ================= -->
+    <section class="screen hidden" id="screen-lobby">
+      <div class="card center">
+        <div class="label">Κωδικός δωματίου</div>
+        <div class="room-code" id="lobbyCode">----</div>
+        <div class="row">
+          <button class="btn btn-primary" id="shareBtn">📤 Μοίρασε</button>
+          <button class="btn" id="copyBtn">🔗 Αντιγραφή link</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row space">
+          <h2 class="h2">Παίκτες <span id="lobbyCount" class="muted"></span></h2>
+        </div>
+        <ul class="player-list" id="lobbyPlayers"></ul>
+      </div>
+      <div class="card settings-summary" id="lobbySettings"></div>
+      <div class="sticky-actions">
+        <button class="btn btn-big" id="readyBtn">Είμαι έτοιμος ✋</button>
+        <button class="btn btn-primary btn-big hidden" id="startBtn">Έναρξη ▶</button>
+        <button class="btn btn-ghost" id="leaveBtn">Αποχώρηση</button>
+      </div>
+    </section>
+
+    <!-- ================= ΓΥΡΟΣ ================= -->
+    <section class="screen hidden" id="screen-game">
+      <div class="game-head">
+        <div class="round-info" id="roundInfo">Γύρος 1/5</div>
+        <div class="letter" id="letterBig">?</div>
+        <div class="timer">
+          <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+          <div class="timer-sec" id="timerSec">--</div>
+        </div>
+        <div class="finish-banner hidden" id="finishBanner"></div>
+        <div class="others" id="othersProgress"></div>
+      </div>
+      <form class="answers" id="answersForm" autocomplete="off" onsubmit="return false"></form>
+    </section>
+
+    <!-- ================= ΕΛΕΓΧΟΣ ================= -->
+    <section class="screen hidden" id="screen-validating">
+      <div class="center validating">
+        <div class="spinner"></div>
+        <h2 class="h2">Ελέγχουμε τις λέξεις…</h2>
+        <p class="muted">Λεξικό, κατηγορία και ταχύτητα</p>
+      </div>
+    </section>
+
+    <!-- ================= ΑΠΟΤΕΛΕΣΜΑΤΑ ΓΥΡΟΥ ================= -->
+    <section class="screen hidden" id="screen-results">
+      <div class="results-head">
+        <div class="letter small" id="resultsLetter">?</div>
+        <div>
+          <h2 class="h2" id="resultsTitle">Αποτελέσματα γύρου</h2>
+          <p class="muted small-text">Διαφωνείς; Πάτα «Αμφισβήτηση» σε λέξη άλλου παίκτη.</p>
+        </div>
+      </div>
+      <div id="resultsCats"></div>
+      <div class="card">
+        <h2 class="h2">Κατάταξη</h2>
+        <ol class="standings" id="standings"></ol>
+      </div>
+      <div class="sticky-actions">
+        <button class="btn btn-primary btn-big hidden" id="nextBtn">Επόμενος γύρος ▶</button>
+        <p class="muted center hidden" id="waitHost">Περιμένουμε τον host…</p>
+      </div>
+    </section>
+
+    <!-- ================= ΤΕΛΙΚΗ ΚΑΤΑΤΑΞΗ ================= -->
+    <section class="screen hidden" id="screen-final">
+      <div class="center">
+        <div class="trophy">🏆</div>
+        <h2 class="h1" id="winnerText">Νικητής!</h2>
+      </div>
+      <div class="podium" id="podium"></div>
+      <div class="card">
+        <ol class="standings" id="finalStandings"></ol>
+      </div>
+      <div class="sticky-actions">
+        <button class="btn btn-primary btn-big hidden" id="againBtn">🔁 Ξανά παιχνίδι</button>
+        <button class="btn btn-big" id="newRoomBtn">✨ Νέο δωμάτιο</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Overlay αντίστροφης μέτρησης 3-2-1 -->
+  <div class="overlay hidden" id="countdownOverlay"><div class="countdown-num" id="countdownNum">3</div></div>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <div class="confetti" id="confetti"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
